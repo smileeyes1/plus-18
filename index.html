@@ -3,176 +3,245 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>منهاج الجمع – صف أول</title>
+<title>منهاج التعلّم – الجمع بثقة</title>
 
 <style>
-body {
+body{
   font-family: Arial, sans-serif;
-  background: #f7f7f7;
-  margin: 0;
-  padding: 20px;
-  text-align: center;
+  background:#f7f7f7;
+  margin:0;
+  padding:0;
+  text-align:center;
 }
 
-h2 { margin-bottom: 12px; }
+.screen{ display:none; padding:30px; }
 
-.stage { display: none; }
+.active{ display:block; }
 
-.board {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 16px;
-  max-width: 700px;
-  margin: auto;
+input{
+  font-size:18px;
+  padding:8px;
+  text-align:center;
 }
 
-.buttons button {
-  font-size: 18px;
-  padding: 10px;
-  margin: 6px;
+button{
+  font-size:18px;
+  padding:10px 16px;
+  margin:6px;
+  cursor:pointer;
 }
 
-.path {
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-bottom: 20px;
+.board{
+  background:#ffffff;
+  max-width:700px;
+  margin:auto;
+  padding:20px;
+  border-radius:14px;
 }
 
-.card {
-  width: 200px;
-  padding: 12px;
-  border-radius: 12px;
-  background: #ddd;
-  opacity: 0.5;
+.path{
+  display:flex;
+  justify-content:center;
+  gap:12px;
+  margin-bottom:18px;
 }
 
-.card.active {
-  background: #ffffff;
-  border: 3px solid #4CAF50;
-  opacity: 1;
+.stageBox{
+  width:180px;
+  padding:10px;
+  border-radius:10px;
+  background:#ddd;
+  opacity:0.4;
+}
+
+.stageBox.active{
+  background:#ffffff;
+  border:3px solid #4CAF50;
+  opacity:1;
+}
+
+.feedback{
+  min-height:28px;
+  font-size:18px;
+  margin-top:10px;
+}
+
+.level{
+  font-size:14px;
+  margin-bottom:10px;
+  opacity:0.7;
 }
 </style>
 </head>
 
 <body>
 
-<h2>🧭 مسار التعلّم في الجمع</h2>
-
-<div class="path">
-  <div class="card active" id="p1">الجمع ضمن ١٠</div>
-  <div class="card" id="p2">الجمع ضمن ١٨</div>
-  <div class="card" id="p3">الإكمال إلى ١٠</div>
+<!-- ===== شاشة الترحيب ===== -->
+<div class="screen active" id="welcome">
+  <h2>مرحبًا 👋</h2>
+  <p>ما اسمك؟</p>
+  <input id="nameInput" placeholder="اكتب اسمك">
+  <br><br>
+  <button onclick="start()">ابدأ التعلّم 🎒</button>
 </div>
 
-<div class="board">
+<!-- ===== شاشة التعلّم ===== -->
+<div class="screen" id="learning">
 
-<!-- ===== المرحلة 1 ===== -->
-<div class="stage" id="stage1">
-  <h3>➕ الجمع ضمن ١٠</h3>
-  <div id="q1"></div>
-  <div class="buttons" id="c1"></div>
-  <p id="f1"></p>
-</div>
+  <div class="board">
 
-<!-- ===== المرحلة 2 ===== -->
-<div class="stage" id="stage2">
-  <h3>➕ الجمع ضمن ١٨</h3>
-  <div id="q2"></div>
-  <div class="buttons" id="c2"></div>
-  <p id="f2"></p>
-</div>
+    <div class="level" id="levelText"></div>
 
-<!-- ===== المرحلة 3 ===== -->
-<div class="stage" id="stage3">
-  <h3>🧠 نُكمّل إلى ١٠</h3>
-  <div id="q3"></div>
-  <div class="buttons" id="c3"></div>
-  <p id="f3"></p>
-</div>
+    <div class="path">
+      <div class="stageBox active" id="p1">ضمن ١٠</div>
+      <div class="stageBox" id="p2">ضمن ١٨</div>
+      <div class="stageBox" id="p3">الإكمال إلى ١٠</div>
+    </div>
 
+    <h3 id="title"></h3>
+    <div id="question"></div>
+    <div id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+
+  </div>
 </div>
 
 <script>
 /* ===== أدوات ===== */
 function A(n){return n.toString().replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);}
 function R(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function show(id){document.querySelectorAll(".stage").forEach(s=>s.style.display="none");
-  document.getElementById(id).style.display="block";}
+function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
 
-let stage = parseInt(localStorage.getItem("stage")) || 1;
-let score = 0;
+/* ===== بيانات ===== */
+const praise = [
+  "أحسنت يا {{name}} 🌟",
+  "تفكيرك جميل 👏",
+  "رائع، واصلت بهدوء",
+  "تقدّم واضح يا {{name}}"
+];
 
-activatePath();
-startStage();
+const retry = [
+  "لا بأس، لنحاول مرة أخرى",
+  "خذ وقتك وعدّ بهدوء",
+  "المحاولة جزء من التعلّم"
+];
 
-function activatePath(){
-  if(stage >= 2) document.getElementById("p2").classList.add("active");
-  if(stage >= 3) document.getElementById("p3").classList.add("active");
+const levels = {
+  1:"🟢 مستكشف الأعداد",
+  2:"🔵 باني الجمع",
+  3:"🟣 متقن العشرة"
+};
+
+let name="", stage=1, streak=0;
+
+/* ===== بدء ===== */
+function start(){
+  name=document.getElementById("nameInput").value.trim();
+  if(name.length<2){ alert("اكتب اسمك 😊"); return; }
+
+  localStorage.setItem("studentName",name);
+  document.getElementById("welcome").classList.remove("active");
+  document.getElementById("learning").classList.add("active");
+  load();
 }
 
-function startStage(){
-  if(stage === 1){ show("stage1"); game10();}
-  if(stage === 2){ show("stage2"); game18();}
-  if(stage === 3){ show("stage3"); gameMake10();}
+function load(){
+  name = localStorage.getItem("studentName");
+  stage = parseInt(localStorage.getItem("stage")) || 1;
+  streak = 0;
+  renderPath();
+  renderLevel();
+  next();
 }
 
-/* ===== المرحلة 1 ===== */
+function renderLevel(){
+  document.getElementById("levelText").textContent =
+    "المستوى: " + levels[stage];
+}
+
+function renderPath(){
+  if(stage>=2) document.getElementById("p2").classList.add("active");
+  if(stage>=3) document.getElementById("p3").classList.add("active");
+}
+
+/* ===== اللعب ===== */
+function next(){
+  document.getElementById("feedback").textContent="";
+  if(stage===1) game10();
+  if(stage===2) game18();
+  if(stage===3) gameMake10();
+}
+
+function showMsg(txt){
+  document.getElementById("feedback").textContent =
+    txt.replace("{{name}}",name);
+}
+
+/* ===== ضمن 10 ===== */
 function game10(){
+  document.getElementById("title").textContent="الجمع ضمن ١٠";
   let a,b,s;
-  do{ a=R(1,5); b=R(1,5); s=a+b; }while(s>10);
-  document.getElementById("q1").textContent = "🍎".repeat(a)+" + "+"🍓".repeat(b);
-  answers("c1", s, (ok)=>{
-    document.getElementById("f1").textContent = ok?"✅":"❌";
-    progress(ok);
-  });
+  do{a=R(1,5);b=R(1,5);s=a+b;}while(s>10);
+  ask(a,b,s);
 }
 
-/* ===== المرحلة 2 ===== */
+/* ===== ضمن 18 ===== */
 function game18(){
+  document.getElementById("title").textContent="الجمع ضمن ١٨";
   let a=R(1,9), b=R(1,9), s=a+b;
   if(s>18) return game18();
-  document.getElementById("q2").textContent = "🍎".repeat(a)+" + "+"🍓".repeat(b);
-  answers("c2", s, (ok)=>{
-    document.getElementById("f2").textContent = ok?"✅":"❌";
-    progress(ok);
-  });
+  ask(a,b,s);
 }
 
-/* ===== المرحلة 3 ===== */
+/* ===== الإكمال إلى 10 ===== */
 function gameMake10(){
+  document.getElementById("title").textContent="نُكمّل إلى ١٠";
   let a=R(6,9), b=R(1,5), s=a+b;
   let need=10-a;
-  document.getElementById("q3").textContent =
-    "🍓".repeat(a)+" + "+"🍎".repeat(need)+" + "+"🍏".repeat(b-need);
-  answers("c3", s, (ok)=>{
-    document.getElementById("f3").textContent = ok?"✅ أكملت ١٠":"❌";
-  });
+  document.getElementById("question").textContent =
+    "🍎".repeat(a)+" + "+"🍓".repeat(need)+" + "+"🍏".repeat(b-need);
+  choices(s);
 }
 
 /* ===== مشترك ===== */
-function answers(box, correct, cb){
+function ask(a,b,s){
+  document.getElementById("question").textContent =
+    "🍎".repeat(a)+" + "+"🍓".repeat(b);
+  choices(s);
+}
+
+function choices(correct){
+  const box=document.getElementById("choices");
+  box.innerHTML="";
   let set=new Set([correct]);
-  while(set.size<3){let f=correct+R(-2,2); if(f>=0&&f<=18)set.add(f);}
-  const c=document.getElementById(box); c.innerHTML="";
+  while(set.size<3){
+    let f=correct+R(-2,2);
+    if(f>=0&&f<=18)set.add(f);
+  }
   [...set].forEach(n=>{
     let btn=document.createElement("button");
     btn.textContent=A(n);
-    btn.onclick=()=>cb(n===correct);
-    c.appendChild(btn);
+    btn.onclick=()=>check(n===correct);
+    box.appendChild(btn);
   });
 }
 
-function progress(ok){
-  if(!ok) return;
-  score++;
-  if(score>=4 && stage<3){
-    stage++;
-    score=0;
-    localStorage.setItem("stage",stage);
-    activatePath();
-    startStage();
-  } else setTimeout(startStage, 800);
+function check(ok){
+  if(ok){
+    streak++;
+    showMsg(pick(praise));
+    if(streak>=3 && stage<3){
+      stage++;
+      localStorage.setItem("stage",stage);
+      streak=0;
+      renderPath();
+      renderLevel();
+    }
+    setTimeout(next,900);
+  }else{
+    streak=0;
+    showMsg(pick(retry));
+  }
 }
 </script>
 
