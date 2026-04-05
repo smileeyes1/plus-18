@@ -6,43 +6,94 @@
 <title>منهاج التعلّم – الجمع بثقة</title>
 
 <style>
-html,body{
-  margin:0;padding:0;background:#f7f7f7;
-  font-family:Arial,sans-serif;text-align:center;
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f6f6f6;
+  text-align:center;
 }
+
 .hidden{display:none}
-button{font-size:18px;padding:10px 14px;margin:6px;cursor:pointer}
-input{font-size:18px;padding:8px;text-align:center}
+
+button{
+  font-size:18px;
+  padding:10px 14px;
+  margin:6px;
+  cursor:pointer;
+}
+
+input{
+  font-size:18px;
+  padding:8px;
+  text-align:center;
+}
+
 .header{
-  display:flex;justify-content:space-between;align-items:center;
-  padding:10px 12px;background:#fff;border-bottom:1px solid #ddd
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  padding:10px 14px;
+  background:#fff;
+  border-bottom:1px solid #ddd;
 }
+
 .board{
-  background:#fff;border-radius:14px;padding:16px;
-  max-width:820px;margin:20px auto
+  background:#fff;
+  max-width:800px;
+  margin:20px auto;
+  padding:20px;
+  border-radius:14px;
 }
-.path{display:flex;gap:12px;justify-content:center;margin-bottom:10px}
+
+.path{
+  display:flex;
+  justify-content:center;
+  gap:10px;
+  margin-bottom:10px;
+}
+
 .stageBox{
-  width:200px;padding:10px;border-radius:10px;
-  background:#ddd;opacity:.4
+  padding:8px 14px;
+  border-radius:10px;
+  background:#ddd;
+  opacity:0.4;
 }
+
 .stageBox.active{
-  background:#fff;border:3px solid #4CAF50;opacity:1
+  background:#fff;
+  border:3px solid #4CAF50;
+  opacity:1;
 }
-.visual{font-size:34px;margin:12px}
-.feedback{min-height:28px;font-size:18px;margin-top:8px}
-.level, .idea{font-size:14px;opacity:.75;margin-bottom:6px}
-@media(max-width:600px){.visual{font-size:26px}}
+
+.visual{
+  font-size:34px;
+  margin:14px 0;
+}
+
+.feedback{
+  min-height:28px;
+  font-size:18px;
+  margin-top:6px;
+}
+
+.level,.idea{
+  font-size:14px;
+  opacity:0.8;
+  margin-bottom:4px;
+}
+
+@media(max-width:600px){
+  .visual{font-size:26px}
+}
 </style>
 </head>
 
 <body>
 
-<!-- ✅ الأصوات مخفية وتعمل فقط عبر JavaScript -->
+<!-- أصوات مخفية -->
 <audio id="soundCorrect" preload="auto">
   https://cdn.pixabay.com/audio/2022/03/15/audio_0f60ed42f1.mp3
 </audio>
-
 <audio id="soundEncourage" preload="auto">
   https://cdn.pixabay.com/audio/2022/01/18/audio_64c1b36fc7.mp3
 </audio>
@@ -50,13 +101,13 @@ input{font-size:18px;padding:8px;text-align:center}
 <div class="header">
   <span id="hello">منهاج التعلّم</span>
   <div>
-    <button onclick="toggleQuiet()">🕊️ تعلم بهدوء</button>
+    <button onclick="toggleQuiet()">🕊️ بهدوء</button>
     <button onclick="toggleSound()">🔈 الصوت</button>
     <button onclick="toggleFS()">🖥️ ملء الشاشة</button>
   </div>
 </div>
 
-<!-- شاشة الترحيب -->
+<!-- شاشة الاسم -->
 <div id="welcome">
   <h2>مرحبًا 👋</h2>
   <p>ما اسمك؟</p>
@@ -65,22 +116,24 @@ input{font-size:18px;padding:8px;text-align:center}
   <button onclick="start()">ابدأ التعلّم 🎒</button>
 </div>
 
-<!-- شاشة التعلّم -->
+<!-- شاشة التعلم -->
 <div id="learning" class="hidden">
   <div class="board">
+
     <div class="level" id="levelText"></div>
     <div class="idea" id="ideaText"></div>
 
     <div class="path">
-      <div class="stageBox active" id="p1">ضمن ١٠</div>
-      <div class="stageBox" id="p2">ضمن ١٨</div>
-      <div class="stageBox" id="p3">الإكمال إلى ١٠</div>
+      <div class="stageBox active" id="p1">🟢 ضمن ١٠</div>
+      <div class="stageBox" id="p2">🔵 ضمن ١٨</div>
+      <div class="stageBox" id="p3">🟣 الإكمال إلى ١٠</div>
     </div>
 
     <h3 id="title"></h3>
     <div class="visual" id="question"></div>
     <div id="choices"></div>
     <div class="feedback" id="feedback"></div>
+
   </div>
 </div>
 
@@ -90,129 +143,147 @@ const A=n=>n.toString().replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
 const R=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
 const pick=a=>a[Math.floor(Math.random()*a.length)];
 
-/* بيانات */
+/* بيانات تحفيزية */
 const praise=[
-  "أحسنت يا {{name}} 🌟",
-  "تفكيرك جميل 👏",
-  "تقدّم رائع",
-  "واصل بهدوء"
+ "أحسنت يا {{name}} 🌟",
+ "تفكيرك جميل 👏",
+ "واصل بهدوء 👍",
+ "جميل، تغيّر وتعلّم"
 ];
 const encourage=[
-  "لا بأس، لنحاول مرة أخرى",
-  "خذ وقتك وعدّ بهدوء",
-  "المحاولة جزء من التعلم"
+ "لا بأس، لنحاول مرة أخرى",
+ "عدّ بهدوء وانظر للأشكال",
+ "المحاولة جزء من التعلّم"
 ];
 const ideas={
-  1:"اليوم نتعلم الجمع ضمن ١٠",
-  2:"اليوم نوسّع الجمع إلى ١٨",
-  3:"اليوم نكمّل إلى ١٠ أولاً"
+ 1:"اليوم نتعلّم الجمع ضمن ١٠",
+ 2:"اليوم نوسّع الجمع إلى ١٨",
+ 3:"اليوم نكمّل إلى ١٠ أولًا"
 };
 const levels={
-  1:"🟢 مستكشف الأعداد",
-  2:"🔵 باني الجمع",
-  3:"🟣 متقن العشرة"
+ 1:"🟢 مستكشف الأعداد",
+ 2:"🔵 باني الجمع",
+ 3:"🟣 متقن العشرة"
 };
 
-let name="", stage=1, streak=0;
-let soundOn=true, quiet=false;
+/* حالة */
+let name="",stage=1,streak=0;
+let soundOn=true,quiet=false;
 
 /* بدء */
 function start(){
-  const n=document.getElementById("nameInput").value.trim();
-  if(n.length<2){alert("اكتب اسمك 😊");return;}
-  localStorage.setItem("studentName",n);
-  document.getElementById("welcome").classList.add("hidden");
-  document.getElementById("learning").classList.remove("hidden");
-  load();
+ const n=document.getElementById("nameInput").value.trim();
+ if(n.length<2){alert("اكتب اسمك 😊");return;}
+ localStorage.setItem("studentName",n);
+ document.getElementById("welcome").classList.add("hidden");
+ document.getElementById("learning").classList.remove("hidden");
+ load();
 }
 
 function load(){
-  name=localStorage.getItem("studentName");
-  stage=parseInt(localStorage.getItem("stage"))||1;
-  document.getElementById("hello").textContent="مرحبًا يا "+name;
-  render(); next();
+ name=localStorage.getItem("studentName");
+ stage=parseInt(localStorage.getItem("stage"))||1;
+ document.getElementById("hello").textContent="مرحبًا يا "+name;
+ render(); next();
 }
 
+/* واجهة */
 function render(){
-  document.getElementById("levelText").textContent="المستوى: "+levels[stage];
-  document.getElementById("ideaText").textContent="💡 "+ideas[stage];
-  if(stage>=2) document.getElementById("p2").classList.add("active");
-  if(stage>=3) document.getElementById("p3").classList.add("active");
+ document.getElementById("levelText").textContent="المستوى: "+levels[stage];
+ document.getElementById("ideaText").textContent="💡 "+ideas[stage];
+ if(stage>=2) document.getElementById("p2").classList.add("active");
+ if(stage>=3) document.getElementById("p3").classList.add("active");
 }
 
 function play(id){
-  if(!soundOn||quiet) return;
-  const s=document.getElementById(id);
-  s.currentTime=0; s.play();
+ if(!soundOn||quiet) return;
+ const s=document.getElementById(id);
+ s.currentTime=0; s.play();
 }
 
 function toggleSound(){soundOn=!soundOn}
 function toggleQuiet(){quiet=!quiet}
 function toggleFS(){
-  if(!document.fullscreenElement)document.documentElement.requestFullscreen();
-  else document.exitFullscreen();
+ if(!document.fullscreenElement)document.documentElement.requestFullscreen();
+ else document.exitFullscreen();
 }
 
+/* الانتقال */
 function next(){
-  document.getElementById("feedback").textContent="";
-  document.getElementById("choices").innerHTML="";
-  if(stage===1) game10();
-  else if(stage===2) game18();
-  else gameMake10();
+ document.getElementById("feedback").textContent="";
+ document.getElementById("choices").innerHTML="";
+ if(stage===1) game10();
+ else if(stage===2) game18();
+ else gameMake10();
 }
 
-function ask(txt,correct){
-  document.getElementById("question").textContent=txt;
-  const c=document.getElementById("choices");
-  let set=new Set([correct]);
-  while(set.size<3){
-    let f=correct+R(-2,2);
-    if(f>=0&&f<=18)set.add(f);
-  }
-  [...set].forEach(n=>{
-    let b=document.createElement("button");
-    b.textContent=A(n);
-    b.onclick=()=>check(n===correct);
-    c.appendChild(b);
-  });
+/* توليد الخيارات المنضبط */
+function buildChoices(correct,min,max){
+ const box=document.getElementById("choices");
+ let set=new Set([correct]);
+ while(set.size<3){
+  let f=R(min,max);
+  if(f>=0&&f<=18)set.add(f);
+ }
+ [...set].sort(()=>Math.random()-0.5).forEach(n=>{
+  let b=document.createElement("button");
+  b.textContent=A(n);
+  b.onclick=()=>check(n===correct);
+  box.appendChild(b);
+ });
 }
 
+/* ضمن 10 */
 function game10(){
-  document.getElementById("title").textContent="الجمع ضمن ١٠";
-  let a,b,s;
-  do{a=R(1,5);b=R(1,5);s=a+b;}while(s>10);
-  ask("🍎".repeat(a)+" + "+"🍓".repeat(b),s);
-}
-function game18(){
-  document.getElementById("title").textContent="الجمع ضمن ١٨";
-  let a=R(1,9),b=R(1,9),s=a+b;
-  if(s>18) return game18();
-  ask("🍎".repeat(a)+" + "+"🍓".repeat(b),s);
-}
-function gameMake10(){
-  document.getElementById("title").textContent="نكمّل إلى ١٠";
-  let a=R(6,9),b=R(1,5),s=a+b;
-  let need=10-a;
-  ask("🍓".repeat(a)+" + "+"🍎".repeat(need),s);
+ document.getElementById("title").textContent="الجمع ضمن ١٠";
+ let a,b,s;
+ do{a=R(1,5);b=R(1,5);s=a+b;}while(s>10);
+ document.getElementById("question").textContent="🍎".repeat(a)+" + "+"🍓".repeat(b);
+ buildChoices(s,s-2,s+2);
 }
 
+/* ضمن 18 أولاً */
+function game18(){
+ document.getElementById("title").textContent="الجمع ضمن ١٨";
+ let a=R(1,9),b=R(1,9),s=a+b;
+ if(s>18) return game18();
+ document.getElementById("question").textContent="🍎".repeat(a)+" + "+"🍓".repeat(b);
+ buildChoices(s,s-2,s+2);
+}
+
+/* الإكمال إلى 10 – مصحح */
+function gameMake10(){
+ document.getElementById("title").textContent="نكمّل إلى ١٠";
+ let base=R(6,9);
+ let add=R(1,9);
+ if(base+add>18) add=18-base;
+ let need=10-base;
+ let rest=add-need;
+ let visual="🍎".repeat(base)+" + "+"🍓".repeat(need);
+ if(rest>0) visual+=" + "+"🍏".repeat(rest);
+ document.getElementById("question").textContent=visual;
+ let correct=base+add;
+ buildChoices(correct,correct-2,correct+2);
+}
+
+/* تحقق */
 function check(ok){
-  if(ok){
-    play("soundCorrect");
-    streak++;
-    document.getElementById("feedback").textContent=
-      pick(praise).replace("{{name}}",name);
-    if(streak>=3&&stage<3){
-      stage++; streak=0;
-      localStorage.setItem("stage",stage);
-      render();
-    }
-  }else{
-    streak=0;
-    play("soundEncourage");
-    document.getElementById("feedback").textContent=pick(encourage);
+ if(ok){
+  play("soundCorrect");
+  streak++;
+  document.getElementById("feedback").textContent=
+   pick(praise).replace("{{name}}",name);
+  if(streak>=3&&stage<3){
+   stage++; streak=0;
+   localStorage.setItem("stage",stage);
+   render();
   }
-  setTimeout(next,900);
+ }else{
+  streak=0;
+  play("soundEncourage");
+  document.getElementById("feedback").textContent=pick(encourage);
+ }
+ setTimeout(next,900);
 }
 </script>
 
