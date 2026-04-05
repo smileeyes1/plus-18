@@ -1,248 +1,179 @@
-
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>منهاج التعلّم | الجمع حتى ١٨</title>
+<title>منهاج الجمع – صف أول</title>
 
 <style>
-/* ===== أساسيات تربوية ===== */
-html, body {
+body {
+  font-family: Arial, sans-serif;
+  background: #f7f7f7;
   margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100%;
-  background: #fff7ec;
-  font-family: "Arial", sans-serif;
-  color: #333;
-}
-
-/* ===== الحاوية العامة ===== */
-.app {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
-
-/* ===== الشريط العلوي ===== */
-header {
-  background: #fff;
-  border-bottom: 1px solid #eee;
-  padding: 8px 12px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-header h1 {
-  font-size: 18px;
-  margin: 0;
-}
-
-.fs-btn {
-  font-size: 14px;
-  padding: 6px 10px;
-  border-radius: 6px;
-  border: 1px solid #aaa;
-  cursor: pointer;
-}
-
-/* ===== منطقة التعلّم (التركيز) ===== */
-.main {
-  flex: 1;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 12px;
-}
-
-.board {
-  background: #ffffff;
-  border-radius: 16px;
-  padding: 16px;
-  max-width: 720px;
-  width: 100%;
+  padding: 20px;
   text-align: center;
 }
 
-/* ===== العناصر البصرية ===== */
-.rabbit {
-  font-size: 56px;
-  margin-bottom: 6px;
+h2 { margin-bottom: 12px; }
+
+.stage { display: none; }
+
+.board {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 16px;
+  max-width: 700px;
+  margin: auto;
 }
 
-.question {
+.buttons button {
   font-size: 18px;
-  margin-bottom: 10px;
-}
-
-.visual {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 34px;
-  margin: 12px 0;
-  flex-wrap: wrap;
-}
-
-/* ===== أزرار الإجابة ===== */
-.choices {
-  margin-top: 10px;
-}
-
-.choices button {
-  font-size: 18px;
-  width: 70px;
-  height: 54px;
+  padding: 10px;
   margin: 6px;
-  border-radius: 10px;
-  border: 1px solid #999;
-  background: #f5f5f5;
-  cursor: pointer;
 }
 
-/* ===== التغذية الراجعة ===== */
-.feedback {
-  min-height: 28px;
-  font-size: 18px;
-  margin-top: 8px;
+.path {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-bottom: 20px;
 }
 
-/* ===== شريط المعلم ===== */
-.teacher-bar {
-  background: #f1f6ff;
-  border-top: 1px solid #dde6ff;
-  padding: 8px;
-  font-size: 13px;
-  display: none;
+.card {
+  width: 200px;
+  padding: 12px;
+  border-radius: 12px;
+  background: #ddd;
+  opacity: 0.5;
 }
 
-/* ===== تحسين الهاتف ===== */
-@media (max-width: 600px) {
-  .visual { font-size: 26px; }
-  header h1 { font-size: 16px; }
+.card.active {
+  background: #ffffff;
+  border: 3px solid #4CAF50;
+  opacity: 1;
 }
 </style>
 </head>
 
 <body>
 
-<div class="app">
+<h2>🧭 مسار التعلّم في الجمع</h2>
 
-  <!-- ===== الرأس ===== -->
-  <header>
-    <h1>🐰 منهاج التعلّم: الجمع حتى ١٨</h1>
-    <button class="fs-btn" id="fullscreenBtn">🖥️ ملء الشاشة</button>
-  </header>
+<div class="path">
+  <div class="card active" id="p1">الجمع ضمن ١٠</div>
+  <div class="card" id="p2">الجمع ضمن ١٨</div>
+  <div class="card" id="p3">الإكمال إلى ١٠</div>
+</div>
 
-  <!-- ===== منطقة التعلّم ===== -->
-  <main class="main">
-    <div class="board">
+<div class="board">
 
-      <div class="rabbit">🐰</div>
+<!-- ===== المرحلة 1 ===== -->
+<div class="stage" id="stage1">
+  <h3>➕ الجمع ضمن ١٠</h3>
+  <div id="q1"></div>
+  <div class="buttons" id="c1"></div>
+  <p id="f1"></p>
+</div>
 
-      <div class="question" id="questionText">
-        كم المجموع؟
-      </div>
+<!-- ===== المرحلة 2 ===== -->
+<div class="stage" id="stage2">
+  <h3>➕ الجمع ضمن ١٨</h3>
+  <div id="q2"></div>
+  <div class="buttons" id="c2"></div>
+  <p id="f2"></p>
+</div>
 
-      <div class="visual">
-        <span id="leftVisual"></span>
-        <span id="operator">＋</span>
-        <span id="rightVisual"></span>
-      </div>
-
-      <div class="choices" id="choices"></div>
-
-      <div class="feedback" id="feedback"></div>
-    </div>
-  </main>
-
-  <!-- ===== شريط المعلم ===== -->
-  <div class="teacher-bar" id="teacherBar">
-    📘 ملاحظة للمعلم: <span id="teacherNote">—</span>
-  </div>
+<!-- ===== المرحلة 3 ===== -->
+<div class="stage" id="stage3">
+  <h3>🧠 نُكمّل إلى ١٠</h3>
+  <div id="q3"></div>
+  <div class="buttons" id="c3"></div>
+  <p id="f3"></p>
+</div>
 
 </div>
 
 <script>
-/* ===== أدوات مساعدة ===== */
-const toArabic = n => n.toString().split('').map(d=>'٠١٢٣٤٥٦٧٨٩'[d]).join('');
-const rand = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
-const shuffle = a => a.sort(()=>Math.random()-0.5);
+/* ===== أدوات ===== */
+function A(n){return n.toString().replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);}
+function R(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+function show(id){document.querySelectorAll(".stage").forEach(s=>s.style.display="none");
+  document.getElementById(id).style.display="block";}
 
-/* ===== عناصر ===== */
-const leftV=document.getElementById("leftVisual");
-const rightV=document.getElementById("rightVisual");
-const questionText=document.getElementById("questionText");
-const choices=document.getElementById("choices");
-const feedback=document.getElementById("feedback");
-const teacherBar=document.getElementById("teacherBar");
-const teacherNote=document.getElementById("teacherNote");
+let stage = parseInt(localStorage.getItem("stage")) || 1;
+let score = 0;
 
-/* ===== حالة التعلم ===== */
-let correct=0, wrong=0;
+activatePath();
+startStage();
 
-/* ===== منطق الجمع ===== */
-function newQuestion(){
-  choices.innerHTML="";
-  feedback.textContent="";
-  questionText.textContent="كم المجموع؟";
+function activatePath(){
+  if(stage >= 2) document.getElementById("p2").classList.add("active");
+  if(stage >= 3) document.getElementById("p3").classList.add("active");
+}
 
-  let a,b,total;
-  do{
-    a=rand(1,9);
-    b=rand(1,9);
-    total=a+b;
-  }while(total>18);
+function startStage(){
+  if(stage === 1){ show("stage1"); game10();}
+  if(stage === 2){ show("stage2"); game18();}
+  if(stage === 3){ show("stage3"); gameMake10();}
+}
 
-  leftV.textContent="🍓".repeat(a);
-  rightV.textContent="🍎".repeat(b);
-
-  let options=new Set([total]);
-  while(options.size<3){
-    let f=total+rand(-2,2);
-    if(f>=0 && f<=18) options.add(f);
-  }
-
-  shuffle([...options]).forEach(n=>{
-    let btn=document.createElement("button");
-    btn.textContent=toArabic(n);
-    btn.onclick=()=>check(n,total,a,b);
-    choices.appendChild(btn);
+/* ===== المرحلة 1 ===== */
+function game10(){
+  let a,b,s;
+  do{ a=R(1,5); b=R(1,5); s=a+b; }while(s>10);
+  document.getElementById("q1").textContent = "🍎".repeat(a)+" + "+"🍓".repeat(b);
+  answers("c1", s, (ok)=>{
+    document.getElementById("f1").textContent = ok?"✅":"❌";
+    progress(ok);
   });
 }
 
-function check(ans,total,a,b){
-  if(ans===total){
-    feedback.textContent=`✅ أحسنت! ${toArabic(a)} + ${toArabic(b)} = ${toArabic(total)}`;
-    correct++; wrong=0;
-    teacherNote.textContent="الفهم مستقر، يمكن المتابعة.";
-    teacherBar.style.display="block";
-    setTimeout(newQuestion,1300);
-  }else{
-    feedback.textContent="❌ جرّب مرة أخرى";
-    wrong++; correct=0;
-    teacherNote.textContent="خطأ طبيعي، دعم بصري مناسب.";
-    teacherBar.style.display="block";
-  }
+/* ===== المرحلة 2 ===== */
+function game18(){
+  let a=R(1,9), b=R(1,9), s=a+b;
+  if(s>18) return game18();
+  document.getElementById("q2").textContent = "🍎".repeat(a)+" + "+"🍓".repeat(b);
+  answers("c2", s, (ok)=>{
+    document.getElementById("f2").textContent = ok?"✅":"❌";
+    progress(ok);
+  });
 }
 
-/* ===== ملء الشاشة ===== */
-const fsBtn=document.getElementById("fullscreenBtn");
-fsBtn.onclick=()=>{
-  if(!document.fullscreenElement){
-    document.documentElement.requestFullscreen();
-    fsBtn.textContent="⛔ خروج من ملء الشاشة";
-  }else{
-    document.exitFullscreen();
-    fsBtn.textContent="🖥️ ملء الشاشة";
-  }
-};
+/* ===== المرحلة 3 ===== */
+function gameMake10(){
+  let a=R(6,9), b=R(1,5), s=a+b;
+  let need=10-a;
+  document.getElementById("q3").textContent =
+    "🍓".repeat(a)+" + "+"🍎".repeat(need)+" + "+"🍏".repeat(b-need);
+  answers("c3", s, (ok)=>{
+    document.getElementById("f3").textContent = ok?"✅ أكملت ١٠":"❌";
+  });
+}
 
-/* ===== تشغيل أولي ===== */
-newQuestion();
+/* ===== مشترك ===== */
+function answers(box, correct, cb){
+  let set=new Set([correct]);
+  while(set.size<3){let f=correct+R(-2,2); if(f>=0&&f<=18)set.add(f);}
+  const c=document.getElementById(box); c.innerHTML="";
+  [...set].forEach(n=>{
+    let btn=document.createElement("button");
+    btn.textContent=A(n);
+    btn.onclick=()=>cb(n===correct);
+    c.appendChild(btn);
+  });
+}
+
+function progress(ok){
+  if(!ok) return;
+  score++;
+  if(score>=4 && stage<3){
+    stage++;
+    score=0;
+    localStorage.setItem("stage",stage);
+    activatePath();
+    startStage();
+  } else setTimeout(startStage, 800);
+}
 </script>
 
 </body>
