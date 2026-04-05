@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<title>منهاج الجمع حتى ١٨</title>
+
+<style>
+  body{
+    font-family: "Arial", sans-serif;
+    background:#fff8eb;
+    color:#333;
+    text-align:center;
+  }
+
+  .container{
+    max-width:680px;
+    margin:auto;
+    padding:12px;
+  }
+
+  h2{ margin-bottom:6px; }
+
+  .rabbit{ font-size:56px;margin-bottom:8px; }
+
+  .board{
+    background:#ffffff;
+    border-radius:14px;
+    padding:14px;
+  }
+
+  .visual{
+    display:flex;
+    justify-content:space-around;
+    align-items:center;
+    font-size:34px;
+    margin:12px 0;
+  }
+
+  .choices button{
+    font-size:18px;
+    padding:10px 18px;
+    margin:6px;
+    border-radius:10px;
+    border:1px solid #999;
+    cursor:pointer;
+    background:#f6f6f6;
+  }
+
+  .feedback{
+    min-height:26px;
+    font-size:18px;
+    margin-top:8px;
+  }
+
+  .tools{
+    margin-top:10px;
+  }
+
+  .tools button{
+    font-size:14px;
+    padding:6px 10px;
+    margin:4px;
+  }
+
+  .teacher{
+    background:#eef5ff;
+    border-right:6px solid #4b77be;
+    margin-top:10px;
+    padding:8px;
+    text-align:right;
+  }
+
+  .muted{ color:#666;font-size:13px }
+</style>
+</head>
+
+<body>
+<div class="container">
+
+  <h2>🐰 منهاج التعلّم: الجمع حتى ١٨</h2>
+  <div class="rabbit">🐰</div>
+
+  <!-- لوحة التعلم -->
+  <div class="board">
+    <div id="questionText">كم المجموع؟</div>
+
+    <div class="visual">
+      <div id="leftVisual"></div>
+      <div id="operator">＋</div>
+      <div id="rightVisual"></div>
+    </div>
+
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+
+  <!-- أدوات التحكم (للمعلم) -->
+  <div class="tools">
+    <button onclick="startSum()">جمع مباشر</button>
+    <button onclick="startMissing()">العدد الناقص</button>
+    <button onclick="toggleTeacher()">رسائل للمعلم</button>
+  </div>
+
+  <!-- رسالة المعلم -->
+  <div class="teacher" id="teacherBox" style="display:none">
+    <b>مؤشر تربوي:</b>
+    <div class="muted" id="teacherMessage">—</div>
+  </div>
+
+</div>
+
+<script>
+/* ===================================================
+   أدوات عامة
+   =================================================== */
+
+// تحويل أرقام غربية إلى شرقية (للطفل)
+function toArabic(num){
+  const map = ['٠','١','٢','٣','٤','٥','٦','٧','٨','٩'];
+  return num.toString().split('').map(d=>map[d]).join('');
+}
+
+// ترتيب عشوائي بسيط
+function shuffle(arr){
+  return arr.sort(()=>Math.random()-0.5);
+}
+
+/* ===================================================
+   حالة التعلم (صامتة)
+   =================================================== */
+
+let correctStreak = 0; // نجاح متتالٍ
+let wrongTries = 0;   // أخطاء متتالية
+let showTeacherBox = false;
+
+/* ===================================================
+   عناصر الشاشة
+   =================================================== */
+
+const leftV = document.getElementById("leftVisual");
+const rightV = document.getElementById("rightVisual");
+const opV = document.getElementById("operator");
+const fb = document.getElementById("feedback");
+const choices = document.getElementById("choices");
+const qText = document.getElementById("questionText");
+const teacherBox = document.getElementById("teacherBox");
+const teacherMsg = document.getElementById("teacherMessage");
+
+/* ===================================================
+   منطق التعلّم
+   =================================================== */
+
+let a=0,b=0,total=0,missing=0;
+let mode = "sum";
+
+/* -------- رسائل للمعلم -------- */
+function teacherHint(msg){
+  if(showTeacherBox){
+    teacherMsg.textContent = msg;
+  }
+}
+
+/* -------- التكيّف الصامت -------- */
+function onCorrect(){
+  correctStreak++;
+  wrongTries = 0;
+
+  if(correctStreak >= 3){
+    teacherHint("الطفل بدأ يثبت المفهوم. تخفيف الدعم مناسب.");
+    correctStreak = 0;
+  }
+}
+
+function onWrong(){
+  wrongTries++;
+  correctStreak = 0;
+
+  if(wrongTries === 1){
+    teacherHint("خطأ طبيعي — دعم بصري إضافي مفيد.");
+  }
+  if(wrongTries >= 2){
+    teacherHint("اقتراح: العودة للعدّ بالمحسوسات.");
+  }
+}
+
+/* ===================================================
+   الجمع المباشر
+   =================================================== */
+
+function startSum(){
+  mode = "sum";
+  newSum();
+}
+
+function newSum(){
+  resetUI();
+  qText.textContent = "كم المجموع؟";
+
+  do{
+    a = rand(1,9);
+    b = rand(1,9);
+    total = a + b;
+  }while(total > 18);
+
+  leftV.textContent = "🍎".repeat(a);
+  rightV.textContent = "🍏".repeat(b);
+
+  buildChoices(total, checkSum);
+}
+
+function checkSum(ans){
+  if(ans === total){
+    fb.textContent = `✅ أحسنت! ${toArabic(a)} + ${toArabic(b)} = ${toArabic(total)}`;
+    onCorrect();
+    setTimeout(newSum, 1300);
+  }else{
+    fb.textContent = "❌ جرّب مرة أخرى";
+    onWrong();
+  }
+}
+
+/* ===================================================
+   العدد الناقص
+   =================================================== */
+
+function startMissing(){
+  mode = "missing";
+  newMissing();
+}
+
+function newMissing(){
+  resetUI();
+  qText.textContent = "أين العدد المفقود؟";
+
+  total = rand(8,15);
+  a = rand(0,total-1);
+  missing = total - a;
+
+  leftV.textContent = "🍎".repeat(a) + " + ❓";
+  rightV.textContent = "= " + "🍓".repeat(total);
+
+  buildChoices(missing, checkMissing);
+}
+
+function checkMissing(ans){
+  if(ans === missing){
+    fb.textContent =
+      `✅ أحسنت! ${toArabic(a)} + ${toArabic(missing)} = ${toArabic(total)}`;
+    onCorrect();
+    setTimeout(newMissing, 1300);
+  }else{
+    fb.textContent = "❌ حاول التفكير بهدوء";
+    onWrong();
+  }
+}
+
+/* ===================================================
+   أدوات مساعدة
+   =================================================== */
+
+function resetUI(){
+  fb.textContent = "";
+  choices.innerHTML = "";
+  opV.textContent = "＋";
+}
+
+function buildChoices(correct, handler){
+  let set = new Set([correct]);
+  while(set.size < 3){
+    let f = correct + rand(-2,2);
+    if(f >= 0 && f <= 18) set.add(f);
+  }
+
+  shuffle([...set]).forEach(n=>{
+    const btn = document.createElement("button");
+    btn.textContent = toArabic(n);
+    btn.onclick = ()=>handler(n);
+    choices.appendChild(btn);
+  });
+}
+
+function rand(min,max){
+  return Math.floor(Math.random()*(max-min+1))+min;
+}
+
+function toggleTeacher(){
+  showTeacherBox = !showTeacherBox;
+  teacherBox.style.display = showTeacherBox ? "block" : "none";
+  teacherMsg.textContent = "—";
+}
+
+/* بدء تلقائي */
+startSum();
+</script>
+</body>
+</html>
