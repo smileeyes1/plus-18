@@ -6,217 +6,212 @@
 <title>منهاج التعلّم – الجمع بثقة</title>
 
 <style>
-body{
-  font-family: Arial, sans-serif;
-  background:#f7f7f7;
-  margin:0;
-  padding:0;
-  text-align:center;
-}
+/* ===== أساسيات ===== */
+html,body{margin:0;padding:0;background:#f7f7f7;font-family:Arial,sans-serif}
+.hidden{display:none}
+.center{text-align:center}
+button{font-size:18px;padding:10px 14px;margin:6px;cursor:pointer}
+input{font-size:18px;padding:8px;text-align:center}
 
-.screen{ display:none; padding:30px; }
+/* ===== هيكل ===== */
+.header{display:flex;gap:8px;justify-content:space-between;align-items:center;padding:10px 12px;background:#fff;border-bottom:1px solid #ddd}
+.header h3{margin:0;font-size:16px}
+.app{max-width:820px;margin:auto;padding:12px}
+.board{background:#fff;border-radius:14px;padding:16px;min-height:320px}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
 
-.active{ display:block; }
+/* ===== المسار ===== */
+.path{display:flex;gap:12px;justify-content:center;margin-bottom:10px}
+.stageBox{width:200px;padding:10px;border-radius:10px;background:#ddd;opacity:.45}
+.stageBox.active{background:#fff;border:3px solid #4CAF50;opacity:1}
 
-input{
-  font-size:18px;
-  padding:8px;
-  text-align:center;
-}
+/* ===== لعب ===== */
+.visual{font-size:34px;margin:12px 0}
+.choices{margin:8px 0}
+.feedback{min-height:30px;font-size:18px;margin-top:6px}
+.level{font-size:14px;opacity:.7;margin-bottom:6px}
+.idea{font-size:14px;opacity:.75;margin-bottom:6px}
 
-button{
-  font-size:18px;
-  padding:10px 16px;
-  margin:6px;
-  cursor:pointer;
-}
-
-.board{
-  background:#ffffff;
-  max-width:700px;
-  margin:auto;
-  padding:20px;
-  border-radius:14px;
-}
-
-.path{
-  display:flex;
-  justify-content:center;
-  gap:12px;
-  margin-bottom:18px;
-}
-
-.stageBox{
-  width:180px;
-  padding:10px;
-  border-radius:10px;
-  background:#ddd;
-  opacity:0.4;
-}
-
-.stageBox.active{
-  background:#ffffff;
-  border:3px solid #4CAF50;
-  opacity:1;
-}
-
-.feedback{
-  min-height:28px;
-  font-size:18px;
-  margin-top:10px;
-}
-
-.level{
-  font-size:14px;
-  margin-bottom:10px;
-  opacity:0.7;
+/* ===== هاتف ===== */
+@media(max-width:600px){
+  .visual{font-size:26px}
+  button{font-size:16px}
 }
 </style>
 </head>
 
 <body>
 
-<!-- ===== شاشة الترحيب ===== -->
-<div class="screen active" id="welcome">
+<!-- ===== أصوات ===== -->
+https://cdn.pixabay.com/audio/2022/03/15/audio_0f60ed42f1.mp3</audio>
+https://cdn.pixabay.com/audio/2022/01/18/audio_64c1b36fc7.mp3</audio>
+
+<!-- ===== رأس ===== -->
+<div class="header">
+  <h3 id="hello">منهاج التعلّم</h3>
+  <div>
+    <button onclick="toggleQuiet()">🕊️ تعلّم بهدوء</button>
+    <button onclick="toggleSound()">🔈 الصوت</button>
+    <button onclick="toggleFS()">🖥️ ملء الشاشة</button>
+  </div>
+</div>
+
+<div class="app">
+
+<!-- ===== شاشة ترحيب ===== -->
+<div id="welcome" class="center">
   <h2>مرحبًا 👋</h2>
   <p>ما اسمك؟</p>
-  <input id="nameInput" placeholder="اكتب اسمك">
+  <input id="nameInput" placeholder="اكتب اسمك هنا">
   <br><br>
   <button onclick="start()">ابدأ التعلّم 🎒</button>
 </div>
 
 <!-- ===== شاشة التعلّم ===== -->
-<div class="screen" id="learning">
+<div id="learning" class="hidden">
 
-  <div class="board">
+  <div class="level" id="levelText"></div>
+  <div class="idea" id="ideaText"></div>
 
-    <div class="level" id="levelText"></div>
-
-    <div class="path">
-      <div class="stageBox active" id="p1">ضمن ١٠</div>
-      <div class="stageBox" id="p2">ضمن ١٨</div>
-      <div class="stageBox" id="p3">الإكمال إلى ١٠</div>
-    </div>
-
-    <h3 id="title"></h3>
-    <div id="question"></div>
-    <div id="choices"></div>
-    <div class="feedback" id="feedback"></div>
-
+  <div class="path">
+    <div class="stageBox active" id="p1">ضمن ١٠</div>
+    <div class="stageBox" id="p2">ضمن ١٨</div>
+    <div class="stageBox" id="p3">الإكمال إلى ١٠</div>
   </div>
+
+  <div class="board center">
+    <h3 id="title"></h3>
+    <div class="visual" id="question"></div>
+    <div class="choices" id="choices"></div>
+    <div class="feedback" id="feedback"></div>
+  </div>
+</div>
+
 </div>
 
 <script>
 /* ===== أدوات ===== */
-function A(n){return n.toString().replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);}
-function R(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function pick(arr){return arr[Math.floor(Math.random()*arr.length)];}
+const A = n => n.toString().replace(/\d/g,d=>"٠١٢٣٤٥٦٧٨٩"[d]);
+const R = (a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+const pick = arr => arr[Math.floor(Math.random()*arr.length)];
+const sleep = ms => new Promise(r=>setTimeout(r,ms));
 
-/* ===== بيانات ===== */
+/* ===== بيانات تحفيز ===== */
 const praise = [
-  "أحسنت يا {{name}} 🌟",
-  "تفكيرك جميل 👏",
-  "رائع، واصلت بهدوء",
-  "تقدّم واضح يا {{name}}"
+  "أحسنت يا {{name}} 🌟","تفكيرك جميل 👏",
+  "تقدّم رائع، واصلت بهدوء","اختيارك صحيح 👍",
+  "جميل، غيّرت الطريقة ونجحت"
 ];
-
-const retry = [
-  "لا بأس، لنحاول مرة أخرى",
-  "خذ وقتك وعدّ بهدوء",
-  "المحاولة جزء من التعلّم"
+const encourage = [
+  "لا بأس، لنحاول مرة أخرى","خذ وقتك وعدّ بهدوء",
+  "المحاولة جزء من التعلّم 😊"
 ];
-
+const reflect = ["كيف عرفت؟","بماذا بدأت العدّ؟","هل ترى طريقة أخرى؟"];
+const ideas = {
+  1:"اليوم نتعلّم الجمع بهدوء دون تجاوز العشرة",
+  2:"اليوم نوسّع الجمع إلى أعداد أكبر",
+  3:"اليوم نُكمل إلى ١٠ أولًا ثم نضيف الباقي"
+};
 const levels = {
   1:"🟢 مستكشف الأعداد",
   2:"🔵 باني الجمع",
   3:"🟣 متقن العشرة"
 };
 
+/* ===== حالة ===== */
 let name="", stage=1, streak=0;
+let quiet=false, soundOn=true;
 
 /* ===== بدء ===== */
 function start(){
-  name=document.getElementById("nameInput").value.trim();
-  if(name.length<2){ alert("اكتب اسمك 😊"); return; }
-
-  localStorage.setItem("studentName",name);
-  document.getElementById("welcome").classList.remove("active");
-  document.getElementById("learning").classList.add("active");
+  const n = document.getElementById("nameInput").value.trim();
+  if(n.length<2){alert("اكتب اسمك 😊");return;}
+  localStorage.setItem("studentName",n);
+  document.getElementById("welcome").classList.add("hidden");
+  document.getElementById("learning").classList.remove("hidden");
   load();
 }
-
 function load(){
-  name = localStorage.getItem("studentName");
+  name = localStorage.getItem("studentName") || "";
   stage = parseInt(localStorage.getItem("stage")) || 1;
   streak = 0;
-  renderPath();
-  renderLevel();
+  document.getElementById("hello").textContent = `مرحبًا يا ${name}`;
+  renderPath(); renderLevel(); renderIdea();
   next();
 }
 
-function renderLevel(){
-  document.getElementById("levelText").textContent =
-    "المستوى: " + levels[stage];
-}
-
+/* ===== واجهة ===== */
 function renderPath(){
+  ["p2","p3"].forEach(id=>document.getElementById(id).classList.remove("active"));
   if(stage>=2) document.getElementById("p2").classList.add("active");
   if(stage>=3) document.getElementById("p3").classList.add("active");
 }
+function renderLevel(){
+  document.getElementById("levelText").textContent = "المستوى: "+levels[stage];
+}
+function renderIdea(){
+  document.getElementById("ideaText").textContent = "💡 "+ideas[stage];
+}
+function showMsg(txt){
+  document.getElementById("feedback").textContent = txt.replace("{{name}}",name);
+}
+
+/* ===== أصوات ===== */
+function playCorrect(){ if(!soundOn||quiet) return;
+  const s=document.getElementById("soundCorrect"); s.currentTime=0; s.volume=.4; s.play();
+}
+function playEncourage(){ if(!soundOn||quiet) return;
+  const s=document.getElementById("soundEncourage"); s.currentTime=0; s.volume=.35; s.play();
+}
+function toggleSound(){
+  soundOn=!soundOn;
+}
+
+/* ===== ملء الشاشة ===== */
+function toggleFS(){
+  if(!document.fullscreenElement) document.documentElement.requestFullscreen();
+  else document.exitFullscreen();
+}
+
+/* ===== وضع هادئ ===== */
+function toggleQuiet(){ quiet=!quiet; }
 
 /* ===== اللعب ===== */
-function next(){
+async function next(){
   document.getElementById("feedback").textContent="";
-  if(stage===1) game10();
-  if(stage===2) game18();
-  if(stage===3) gameMake10();
+  document.getElementById("choices").innerHTML="";
+  // مهلة تفكير قبل إظهار الخيارات
+  if(stage===1){ await game10(); }
+  if(stage===2){ await game18(); }
+  if(stage===3){ await gameMake10(); }
 }
 
-function showMsg(txt){
-  document.getElementById("feedback").textContent =
-    txt.replace("{{name}}",name);
+async function game10(){
+  document.getElementById("title").textContent="➕ الجمع ضمن ١٠";
+  let a,b,s; do{a=R(1,5);b=R(1,5);s=a+b;}while(s>10);
+  document.getElementById("question").textContent="🍎".repeat(a)+" + "+"🍓".repeat(b);
+  await sleep(900); choices(s,10);
 }
-
-/* ===== ضمن 10 ===== */
-function game10(){
-  document.getElementById("title").textContent="الجمع ضمن ١٠";
-  let a,b,s;
-  do{a=R(1,5);b=R(1,5);s=a+b;}while(s>10);
-  ask(a,b,s);
+async function game18(){
+  document.getElementById("title").textContent="➕ الجمع ضمن ١٨";
+  let a=R(1,9), b=R(1,9), s=a+b; if(s>18) return game18();
+  document.getElementById("question").textContent="🍎".repeat(a)+" + "+"🍓".repeat(b);
+  await sleep(900); choices(s,18);
 }
-
-/* ===== ضمن 18 ===== */
-function game18(){
-  document.getElementById("title").textContent="الجمع ضمن ١٨";
-  let a=R(1,9), b=R(1,9), s=a+b;
-  if(s>18) return game18();
-  ask(a,b,s);
-}
-
-/* ===== الإكمال إلى 10 ===== */
-function gameMake10(){
-  document.getElementById("title").textContent="نُكمّل إلى ١٠";
-  let a=R(6,9), b=R(1,5), s=a+b;
+async function gameMake10(){
+  document.getElementById("title").textContent="🧠 نُكمّل إلى ١٠";
+  let a=R(6,9), b=R(1,5), s=a+b; if(s>18) return gameMake10();
   let need=10-a;
-  document.getElementById("question").textContent =
-    "🍎".repeat(a)+" + "+"🍓".repeat(need)+" + "+"🍏".repeat(b-need);
-  choices(s);
+  document.getElementById("question").textContent=
+    "🍓".repeat(a)+" + "+"🍎".repeat(need)+" + "+"🍏".repeat(Math.max(b-need,0));
+  await sleep(900); choices(s,18);
 }
 
-/* ===== مشترك ===== */
-function ask(a,b,s){
-  document.getElementById("question").textContent =
-    "🍎".repeat(a)+" + "+"🍓".repeat(b);
-  choices(s);
-}
-
-function choices(correct){
+function choices(correct,max){
   const box=document.getElementById("choices");
-  box.innerHTML="";
   let set=new Set([correct]);
   while(set.size<3){
-    let f=correct+R(-2,2);
-    if(f>=0&&f<=18)set.add(f);
+    let f=correct+R(-2,2); if(f>=0&&f<=max) set.add(f);
   }
   [...set].forEach(n=>{
     let btn=document.createElement("button");
@@ -226,22 +221,25 @@ function choices(correct){
   });
 }
 
-function check(ok){
+async function check(ok){
   if(ok){
+    playCorrect();
     streak++;
     showMsg(pick(praise));
+    // سؤال انعكاسي قصير
+    if(!quiet){ await sleep(500); showMsg(pick(reflect)); }
     if(streak>=3 && stage<3){
-      stage++;
+      stage++; streak=0;
       localStorage.setItem("stage",stage);
-      streak=0;
-      renderPath();
-      renderLevel();
+      renderPath(); renderLevel(); renderIdea();
     }
-    setTimeout(next,900);
   }else{
     streak=0;
-    showMsg(pick(retry));
+    playEncourage();
+    showMsg(pick(encourage));
   }
+  await sleep(900);
+  next();
 }
 </script>
 
